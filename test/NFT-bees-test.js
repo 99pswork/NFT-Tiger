@@ -6,7 +6,7 @@ describe("NFT", function () {
 
   before(async() =>{
     const NFT = await ethers.getContractFactory("BeesNFT");
-    nft = await NFT.deploy("Honey Pot", "HONEY", "150000000000000000", "200000000000000000", 1, 5, 10, 20);
+    nft = await NFT.deploy("Honey Pot", "HONEY", "150000000000000000", "200000000000000000", 10000);
     await nft.deployed();
 
 

@@ -20,7 +20,6 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     bool public paused = true;
     bool public revealed = false;
-    bool public withdrawHoneyAllowed = false;
 
     uint256 public maxSupply; // 10000
     uint256 public preSalePrice; // ?
@@ -35,7 +34,6 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
     uint256 public raffleReward = 1000000000000000000; // 1 ETH - ?
 
     mapping(address => bool) public isWhiteListed; 
-    mapping(uint => bool) public amountClaimed;
 
     constructor(string memory name, string memory symbol, uint256 _preSalePrice, uint256 _publicSalePrice, uint256 _maxSupply) ERC721(name, symbol) ReentrancyGuard() {
         preSalePrice = _preSalePrice;
@@ -44,24 +42,24 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     function preSaleMint(uint256 _amount) external payable nonReentrant{
-        require(preSaleActive, "NFT-Bees Pre Sale is not Active");
-        require(isWhiteListed[msg.sender], "NFT-Bees Message Sender is not whitelisted");
+        require(preSaleActive, "NFT-Tiger Pre Sale is not Active");
+        require(isWhiteListed[msg.sender], "NFT-Tiger Message Sender is not whitelisted");
         mint(_amount, true);
     }
 
     function publicSaleMint(uint256 _amount) external payable nonReentrant {
-        require(publicSaleActive, "NFT-Bees Public Sale is not Active");
+        require(publicSaleActive, "NFT-Tiger Public Sale is not Active");
         mint(_amount, false);
     }
 
     function mint(uint256 amount,bool state) internal {
-        require(!paused, "NFT-Bees Minting is Paused");
-        require(totalSupply().add(amount) <= maxSupply, "NFT-Bees Max Minting Reached");
+        require(!paused, "NFT-Tiger Minting is Paused");
+        require(totalSupply().add(amount) <= maxSupply, "NFT-Tiger Max Minting Reached");
         if(state){
-            require(preSalePrice*amount <= msg.value, "NFT-Bees ETH Value Sent for Pre Sale is not enough");
+            require(preSalePrice*amount <= msg.value, "NFT-Tiger ETH Value Sent for Pre Sale is not enough");
         }
         else{
-            require(publicSalePrice*amount <= msg.value, "NFT-Bees ETH Value Sent for Public Sale is not enough");
+            require(publicSalePrice*amount <= msg.value, "NFT-Tiger ETH Value Sent for Public Sale is not enough");
         }
         uint mintIndex = totalSupply();
         for(uint ind = 1;ind<=amount;ind++){
@@ -105,20 +103,14 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     function airDrop(address[] memory _address) external onlyOwner {
         uint256 mintIndex = totalSupply();
-        require(totalSupply().add(_address.length) <= maxSupply, "NFT-Bees Maximum Supply Reached");
+        require(totalSupply().add(_address.length) <= maxSupply, "NFT-Tiger Maximum Supply Reached");
         for(uint i=1; i <= _address.length; i++){
             _safeMint(_address[i-1], mintIndex.add(i));
         }
     }
 
-    // Automatically Honey Pot Withdraw allowed after reveal
     function reveal() external onlyOwner {
         revealed = true;
-        withdrawHoneyAllowed = true;
-    }
-
-    function toggleWithdrawHoneyPot() external onlyOwner {
-        withdrawHoneyAllowed = !withdrawHoneyAllowed;
     }
 
     function withdrawTotal() external onlyOwner {
@@ -145,13 +137,8 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
     
     }
 
-    // function sendRaffleReward(address _address) external onlyOwner {
-    //     require(_address != address(0), "NFT-Bees Address cannot be zero");
-    //     payable(_address).transfer(raffleReward);
-    // }
-
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
-        require(_exists(_tokenId), "NFT-Bees URI For Token Non-existent");
+        require(_exists(_tokenId), "NFT-Tiger URI For Token Non-existent");
         if(!revealed){
             return notRevealedUri;
         }
