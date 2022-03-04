@@ -1,1 +1,1 @@
-Bees Hot Pot NFT ERC721
+Tiger NFT ERC721
