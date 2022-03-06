@@ -10,7 +10,7 @@ pragma solidity ^0.8.4;
 
 // NFT Count 10000
 
-contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
+contract TigerNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     using SafeMath for uint256;
     using Strings for uint256;
@@ -25,15 +25,12 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
     uint256 public preSalePrice; // ?
     uint256 public publicSalePrice; // ?
 
-
     string private _baseURIextended;
     
     string public NETWORK_PROVENANCE = "";
     string public notRevealedUri;
 
-    uint256 public raffleReward = 1000000000000000000; // 1 ETH - ?
-
-    mapping(address => bool) public isWhiteListed; 
+    uint256 public raffleReward = 1000000000000000000; // 1 Matic - ?
 
     constructor(string memory name, string memory symbol, uint256 _preSalePrice, uint256 _publicSalePrice, uint256 _maxSupply) ERC721(name, symbol) ReentrancyGuard() {
         preSalePrice = _preSalePrice;
@@ -43,7 +40,6 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     function preSaleMint(uint256 _amount) external payable nonReentrant{
         require(preSaleActive, "NFT-Tiger Pre Sale is not Active");
-        require(isWhiteListed[msg.sender], "NFT-Tiger Message Sender is not whitelisted");
         mint(_amount, true);
     }
 
@@ -73,12 +69,6 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     function setBaseURI(string calldata baseURI_) external onlyOwner {
         _baseURIextended = baseURI_;
-    }
-
-    function addWhiteListAddress(address[] memory _address) external onlyOwner {
-        for (uint i=0; i<_address.length; i++){
-            isWhiteListed[_address[i]] = true;
-        }
     }
 
     function togglePauseState() external onlyOwner {
@@ -133,8 +123,7 @@ contract BeesNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
             block.timestamp + block.difficulty + ((uint256(keccak256(abi.encodePacked(block.coinbase)))) / (block.timestamp)) +
             block.gaslimit + ((uint256(keccak256(abi.encodePacked(msg.sender)))) / (block.timestamp)) + block.number
         )));
-    return 1 + (seed - ((seed / _limit) * _limit));
-    
+        return 1 + (seed - ((seed / _limit) * _limit));
     }
 
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {

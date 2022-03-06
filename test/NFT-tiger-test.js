@@ -5,8 +5,8 @@ const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
 describe("NFT", function () {
 
   before(async() =>{
-    const NFT = await ethers.getContractFactory("BeesNFT");
-    nft = await NFT.deploy("Honey Pot", "HONEY", "150000000000000000", "200000000000000000", 10000);
+    const NFT = await ethers.getContractFactory("TigerNFT");
+    nft = await NFT.deploy("Tiger", "TIGER", "150000000000000000", "200000000000000000", 10000);
     await nft.deployed();
 
 
