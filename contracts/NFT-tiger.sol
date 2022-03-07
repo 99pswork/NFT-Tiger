@@ -3,6 +3,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "erc721a/contracts/ERC721A.sol";
 
 // SPDX-License-Identifier: MIT
 
@@ -10,7 +11,7 @@ pragma solidity ^0.8.4;
 
 // NFT Count 10000
 
-contract TigerNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
+contract TigerNFT is ERC721A, Ownable, ReentrancyGuard {
 
     using SafeMath for uint256;
     using Strings for uint256;
@@ -30,12 +31,16 @@ contract TigerNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
     string public NETWORK_PROVENANCE = "";
     string public notRevealedUri;
 
-    uint256 public raffleReward = 1000000000000000000; // 1 Matic - ?
+    uint256 public raffleReward = 1000000000000000000; // 1 ETH - ?
 
-    constructor(string memory name, string memory symbol, uint256 _preSalePrice, uint256 _publicSalePrice, uint256 _maxSupply) ERC721(name, symbol) ReentrancyGuard() {
+    constructor(string memory name, string memory symbol, uint256 _preSalePrice, uint256 _publicSalePrice, uint256 _maxSupply) ERC721A(name, symbol) ReentrancyGuard() {
         preSalePrice = _preSalePrice;
         publicSalePrice = _publicSalePrice;
         maxSupply = _maxSupply;
+    }
+
+    function _startTokenId() internal view virtual override returns (uint256) {
+        return 1;
     }
 
     function preSaleMint(uint256 _amount) external payable nonReentrant{
@@ -50,17 +55,14 @@ contract TigerNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     function mint(uint256 amount,bool state) internal {
         require(!paused, "NFT-Tiger Minting is Paused");
-        require(totalSupply().add(amount) <= maxSupply, "NFT-Tiger Max Minting Reached");
+        require(totalSupply().add(amount) <= maxSupply, "NFT-Tiger Maximum Supply Reached");
         if(state){
             require(preSalePrice*amount <= msg.value, "NFT-Tiger ETH Value Sent for Pre Sale is not enough");
         }
         else{
             require(publicSalePrice*amount <= msg.value, "NFT-Tiger ETH Value Sent for Public Sale is not enough");
         }
-        uint mintIndex = totalSupply();
-        for(uint ind = 1;ind<=amount;ind++){
-            _safeMint(msg.sender, mintIndex.add(ind));
-        }
+        _safeMint(msg.sender, amount);
     }
 
     function _baseURI() internal view virtual override returns (string memory){
@@ -92,10 +94,9 @@ contract TigerNFT is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     function airDrop(address[] memory _address) external onlyOwner {
-        uint256 mintIndex = totalSupply();
         require(totalSupply().add(_address.length) <= maxSupply, "NFT-Tiger Maximum Supply Reached");
         for(uint i=1; i <= _address.length; i++){
-            _safeMint(_address[i-1], mintIndex.add(i));
+            _safeMint(_address[i-1], 1);
         }
     }
 

@@ -6,7 +6,7 @@ describe("NFT", function () {
 
   before(async() =>{
     const NFT = await ethers.getContractFactory("TigerNFT");
-    nft = await NFT.deploy("Tiger", "TIGER", "150000000000000000", "200000000000000000", 10000);
+    nft = await NFT.deploy("Tiger", "TIGER", "150000000000000000", "200000000000000000", 12);
     await nft.deployed();
 
 
@@ -43,16 +43,6 @@ describe("NFT", function () {
         await nft.togglePublicSale();
     })
 
-    it("Check WhiteListing of Address", async function() {
-        await nft.addWhiteListAddress([accounts[1].address, accounts[2].address, accounts[3].address, accounts[4].address]);
-        expect(await nft.isWhiteListed(accounts[1].address)).to.equal(true);
-        expect(await nft.isWhiteListed(accounts[2].address)).to.equal(true);
-        expect(await nft.isWhiteListed(accounts[3].address)).to.equal(true);
-        expect(await nft.isWhiteListed(accounts[4].address)).to.equal(true);
-        expect(await nft.isWhiteListed(accounts[5].address)).to.equal(false);
-        expect(await nft.isWhiteListed(accounts[6].address)).to.equal(false);
-        expect(await nft.isWhiteListed(accounts[0].address)).to.equal(false);
-    })
 
     it("Check Pre Sale Mint", async function() {
         await expect(nft.connect(accounts[1])
@@ -60,10 +50,6 @@ describe("NFT", function () {
         .to.be.revertedWith("NFT-Tiger Pre Sale is not Active");
 
         await nft.togglePreSale();
-
-        await expect(nft.connect(accounts[5])
-        .preSaleMint(1, {value: ethers.utils.parseEther("0.15")}))
-        .to.be.revertedWith("NFT-Tiger Message Sender is not whitelisted");
 
         await expect(nft.connect(accounts[1])
         .preSaleMint(1, {value: ethers.utils.parseEther("0.15")}))
@@ -85,17 +71,12 @@ describe("NFT", function () {
         await expect(nft.connect(accounts[1])
         .publicSaleMint(1, {value: ethers.utils.parseEther("0.15")}))
         .to.be.revertedWith("NFT-Tiger Public Sale is not Active");
-
         await nft.togglePublicSale();
 
         await nft.connect(accounts[1]).publicSaleMint(1, {value: ethers.utils.parseEther("0.2")});
-
         await nft.connect(accounts[5]).publicSaleMint(1, {value: ethers.utils.parseEther("0.2")});
-
         expect(await nft.balanceOf(accounts[5].address)).to.equal(1);
-
         await nft.connect(accounts[5]).publicSaleMint(4, {value: ethers.utils.parseEther("0.8")});
-
         expect(await nft.totalSupply()).to.equal(8);
 
         expect(await nft.tokenURI(1)).to.equal("");
@@ -112,6 +93,11 @@ describe("NFT", function () {
         
         balanceAcc1 = await nft.balanceOf(accounts[2].address);
         await nft.airDrop([accounts[2].address, accounts[2].address]);
+        
+        await expect(nft.airDrop([accounts[4].address])).to.be.revertedWith("NFT-Tiger Maximum Supply Reached");
+        await expect(nft.connect(accounts[8]).publicSaleMint(1, {value: ethers.utils.parseEther("0.2")}))
+        .to.be.revertedWith("NFT-Tiger Maximum Supply Reached");
+        
         expect(await nft.balanceOf(accounts[2].address)).to.equal(parseInt(balanceAcc1)+2);
 
     })
@@ -136,5 +122,5 @@ describe("NFT", function () {
         contractBal = await web3.eth.getBalance(nft.address);
         expect(contractBal).to.equal(ethers.utils.parseEther("0.0"));
     })
-    
+        
 });
